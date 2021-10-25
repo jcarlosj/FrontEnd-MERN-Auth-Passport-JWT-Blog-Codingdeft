@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Button, FormGroup, InputGroup } from '@blueprintjs/core';
+import { useState, useContext } from 'react';
+import { Button, Callout, FormGroup, InputGroup } from '@blueprintjs/core';
+
+import { UserContext } from '../context/UserContext';
 
 // * Define Functional Component
 const Register = () => {
@@ -9,11 +11,87 @@ const Register = () => {
         [ firstName, setFirstName ] = useState( '' ),
         [ lastName, setLastName ] = useState( ''  ),
         [ email, setEmail ] = useState( '' ),
-        [ password, setPassword ] = useState( '' );
+        [ password, setPassword ] = useState( '' ),
+        [ error, setError ] = useState( '' ),
+        [ isSubmitting, setIsSubmitting ] = useState( false );
+
+    // * Define Context Component
+    const [ userContext, setUserContext ] = useContext( UserContext );
+
+    const handleSubmit = event => {
+        event.preventDefault();
+        console.log( `${ process.env.REACT_APP_API_ENDPOINT }/users/signup` );
+
+        const genericErrorMessage = 'Something went wrong! Please try again later.';
+
+        // Define New State Component
+        setIsSubmitting( true );
+        setError( '' );
+
+        // Peticion al BackEnd para realizar el Registro
+        fetch( `${ process.env.REACT_APP_API_ENDPOINT }/users/signup`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                firstName,
+                lastName,
+                username: email,
+                password
+            })
+        }).
+        then( async response => {
+
+            console.log( response.ok );
+
+            // Define New State Component
+            setIsSubmitting( false );
+
+            if( ! response.ok ) {
+                if( response.status === 400 )
+                    setError( 'Please fill all the fields correctly!' );
+                else if( response.status === 401 )
+                    setError( 'Invalid email and password combination.' );
+                else if( response.status === 500 ) {
+                    const data = await response.json();
+
+                    console.log( response );
+                    if( data.message )
+                        setError( data.message || genericErrorMessage );
+                }
+                else
+                    setError( genericErrorMessage );
+            }
+            else {
+                const data = await response.json();
+
+                // Define New Context Component
+                setUserContext( oldValues => {
+                    return {
+                        ...oldValues,
+                        token: data.token
+                    }
+                });
+            }
+
+        })
+        .catch( error => {
+            // Define New State Component
+            setIsSubmitting( false );
+            setError( genericErrorMessage );
+        });
+
+    }
 
     return (
         <>
-            <form className="auth-form">
+            {   error && <Callout indent="danger">{ error }</Callout> }
+            <form
+                className="auth-form"
+                onSubmit={ handleSubmit }
+            >
                 <FormGroup label="First Name" labelFor="firstName">
                     <InputGroup
                         id="firstName"
@@ -51,7 +129,13 @@ const Register = () => {
                         onChange={ event => setPassword( event .target .value ) }
                     />
                 </FormGroup>
-                <Button intent="primary" text="Register" fill type="submit" />
+                <Button
+                    intent="primary"
+                    text={ `${ isSubmitting ? 'Registering' : 'Register' }` }
+                    fill
+                    type="submit"
+                    disabled={ isSubmitting }
+                />
             </form>
         </>
     )
