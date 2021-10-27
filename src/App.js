@@ -4,9 +4,9 @@ import { Card, Tab, Tabs } from '@blueprintjs/core';
 import Login from './components/Login';
 import Register from './components/Register';
 import Loader from './components/Loader.js';
+import Welcome from './components/Welcome';
 
 import { UserContext } from './context/UserContext';
-import Welcome from './components/Welcome';
 
 // * Define Functional Component
 function App() {
@@ -20,7 +20,9 @@ function App() {
     // * Define Memorizacion de un Callback (evitando re-declaracion al renderizar el componente)
     const verifyUser = useCallback( () => {
 
-        // Peticion al BackEnd para realizar la actualizacion silenciosa dle Token
+        console.log( `${ process.env.REACT_APP_API_ENDPOINT }/users/refreshToken` );
+
+        // Peticion al BackEnd para realizar la actualizacion silenciosa del Token
         fetch( `${ process.env.REACT_APP_API_ENDPOINT }/users/refreshToken`, {
             method: 'POST',
             credentials: 'include',
@@ -47,7 +49,7 @@ function App() {
             }
 
             // * Invoca a refreshToken cada 5 minutos para renovar el token de autenticación
-            setTimeout( verifyUser, 5 * 60 * 1000 );
+            setTimeout( verifyUser, 0.5 * 60 * 1000 );
 
         });
 
