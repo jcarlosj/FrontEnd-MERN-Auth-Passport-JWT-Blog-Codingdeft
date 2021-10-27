@@ -24,3 +24,13 @@ code {
 .loader {
   margin: 100px auto;
 }
+
+.user-details {
+  display: flex;
+  justify-content: space-between;
+}
+
+.user-actions {
+  display: flex;
+  flex-direction: column;
+}

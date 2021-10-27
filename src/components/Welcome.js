@@ -65,6 +65,29 @@ const Welcome = () => {
         }
     }, [ userContext.details, fetchUserDetails ] );
 
+    const handleLogout = () => {
+        console.log( `${ process.env.REACT_APP_API_ENDPOINT }/users/me` );
+
+        fetch( `${ process.env.REACT_APP_API_ENDPOINT }/users/me`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${ userContext.token }`
+            }
+        })
+        .then( async response => {
+            // Define New Context Component
+            setUserContext( oldValues => {
+                console.log( 'oldValues', oldValues );
+
+                return { ...oldValues, details: undefined, token: null }
+            });
+
+            window.localStorage.setItem( 'logout', Date.now() );
+        });
+    }
+
     const handlerRefetch = () => {
         // ! NOTA: Establezca los detalles como indefinidos para que muestre el Spinner y
         // !       fetchUserDetails se invocará desde el useEffect
@@ -100,7 +123,17 @@ const Welcome = () => {
                     </p>
                 </div>
                 <div className="user-actions">
-                    <Button text="Refetch" intent="primary" onClick={ handlerRefetch } />
+                    <Button
+                        text="Logout"
+                        onClick={ handleLogout }
+                        minimal
+                        intent="primary"
+                    />
+                    <Button
+                        text="Refetch"
+                        intent="primary"
+                        onClick={ handlerRefetch }
+                    />
                 </div>
             </div>
         </Card>

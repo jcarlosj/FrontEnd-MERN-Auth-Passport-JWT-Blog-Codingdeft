@@ -57,7 +57,7 @@ function App() {
             console.groupEnd();
 
             // * Invoca a refreshToken cada 5 minutos para renovar el token de autenticación
-            setTimeout( verifyUser, 0.5 * 60 * 1000 );
+            setTimeout( verifyUser, 5 * 60 * 1000 );
 
         });
 
@@ -68,6 +68,22 @@ function App() {
         verifyUser();
     }, [ verifyUser ] );
 
+    // * Define Memorizacion de un Callback (evitando re-declaracion al renderizar el componente)
+    //   Sincroniza cierre de sesión en las pestañas
+    const syncLogout = useCallback( event => {
+        if( event.key === 'logout' ) {
+            // ! NOTA: Si esta usando react-router-dom, puede usar history.push( '/' )
+            window.location.reload();
+        }
+    }, [] );
+
+    // * Define Efecto para el Componente
+    useEffect( () => {
+        window.addEventListener( 'storage', syncLogout );
+        return () => {
+            window.removeEventListener( 'storage', syncLogout );
+        }
+    }, [ syncLogout ] );
 
     // * Condiciona el despliegue de Componente
     return userContext.token === null ? (
