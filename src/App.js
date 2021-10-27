@@ -31,22 +31,30 @@ function App() {
             }
         })
         .then( async response => {
+            console.log( 'response: ', response );
 
+            console.group( 'response.ok', response.ok );
             if( response.ok ) {
 
                 const data = await response.json();
+                console.log( 'data', data );
 
                 // Define New Context Component
                 setUserContext( oldValues => {
+                    console.log( 'oldValues', oldValues );
+
                     return { ...oldValues, token: data.token }
                 });
             }
             else {
                 // Define New Context Component
                 setUserContext( oldValues => {
+                    console.log( 'oldValues', oldValues );
+
                     return { ...oldValues, token: null }
                 });
             }
+            console.groupEnd();
 
             // * Invoca a refreshToken cada 5 minutos para renovar el token de autenticación
             setTimeout( verifyUser, 0.5 * 60 * 1000 );
